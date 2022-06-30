@@ -35,10 +35,8 @@
 import { reactive } from 'vue'
 import { ElLoading } from 'element-plus'
 import { ElMessage } from 'element-plus'
-import { verify } from '../tools/oauth'
 import request from '../tools/request'
 
-verify()
 
 // do not use same name with ref
 const form = reactive({

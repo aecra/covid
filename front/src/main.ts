@@ -12,6 +12,7 @@ import Clause from './components/Clause.vue';
 import Oauth from './components/Oauth.vue';
 
 import {createRouter,createWebHashHistory } from 'vue-router';
+import OauthService from './tools/oauth';
 
 const routes = [
   { path: '/', component: Home },
@@ -25,6 +26,8 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
 })
+
+router.beforeEach(OauthService.navigationGuard);
 
 const app = createApp(App);
 app.use(router);

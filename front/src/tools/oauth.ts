@@ -1,4 +1,5 @@
 import Axios from 'axios';
+import { RouteLocationNormalized } from 'vue-router';
 import { buildQueryString } from './utils';
 
 let config = {
@@ -14,34 +15,32 @@ let config = {
   login_url: 'https://oauth.aecra.cn/login/oauth/authorize',
 };
 
-let verifyAccessToken = () => {
-  return new Promise((resolve, reject) => {
-    if (localStorage.getItem('expires')) {
-      if (Math.floor(Date.now() / 1000) > Number.parseInt(localStorage.getItem('expires') as string)) {
-        refrershAccessToken().then(
-          () => {
-            resolve('refresh');
-          },
-          (err: string) => {
-            reject(err);
-          }
-        );
-      } else {
-        resolve('no need to refresh');
-      }
-    } else {
-      reject('no expires');
+//TODO: access_token and refresh_token expired
+let verifyToken = async () => {
+  if (!localStorage.getItem('access_token')) {
+    // no access token
+    return false;
+  }
+  if (Math.floor(Date.now() / 1000) > Number(localStorage.getItem('expires'))) {
+    // access token expired
+    // refresh token
+    const res = await refrershAccessToken();
+    if (res === 'refresh success') {
+      return true;
     }
-  });
+    return false;
+  }
+  return true;
 };
 
 let getAccessToken = async (code: string) => {
+  console.log("access_token request start");
   const res = await Axios({
     method: 'post',
     url: config.token_endpoint,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: 'Basic ' + btoa(config.client_id + ':' + config.client_secret),
+      Authorization: 'Basic ' + config.client_id + ':' + config.client_secret,
     },
     data: buildQueryString({
       grant_type: 'authorization_code',
@@ -51,12 +50,15 @@ let getAccessToken = async (code: string) => {
       client_secret: config.client_secret,
     }),
   });
+  console.log("access_token request over");
   if (res.data.error || res.data.access_token.includes('error')) {
+    console.log("access_token request is worning");
     return Promise.reject('get access token error');
   }
+  console.log("access_token request is ok");
   localStorage.setItem('access_token', res.data.access_token);
   localStorage.setItem('refresh_token', res.data.refresh_token);
-  localStorage.setItem('expires', String(Math.floor(Date.now() / 1000) + 60 * res.data.expires_in));
+  localStorage.setItem('expires', String(Math.floor(Date.now() / 1000) + res.data.expires_in));
   localStorage.setItem('token_type', res.data.token_type);
 };
 
@@ -83,7 +85,7 @@ let refrershAccessToken = () => {
           }
           localStorage.setItem('access_token', res.data.access_token);
           localStorage.setItem('refresh_token', res.data.refresh_token);
-          localStorage.setItem('expires', String(Math.floor(Date.now() / 1000) + 60 * res.data.expires_in));
+          localStorage.setItem('expires', String(Math.floor(Date.now() / 1000) + res.data.expires_in));
           localStorage.setItem('token_type', res.data.token_type);
           resolve('refresh success');
         })
@@ -129,10 +131,20 @@ let Oauth = (data: any) => {
   }
 };
 
-let verify = async () => {
-  await verifyAccessToken().catch(() => {
-    redirectToLogin();
-  });
+let navigationGuard =  async (to: RouteLocationNormalized) => {
+  if(to.path !== '/Oauth' && !(await OauthService.verifyToken())){
+    return "/Oauth"
+  }
+  if (to.path === '/Oauth') {
+    OauthService.Oauth(to.query);
+    return false;
+  }
+}
+
+const OauthService = {
+  Oauth,
+  verifyToken,
+  navigationGuard,
 };
 
-export { verify, Oauth };
+export default OauthService;

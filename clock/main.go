@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"gorm.io/driver/mysql"
@@ -44,11 +45,23 @@ func main() {
 
 func report(user User, wg *sync.WaitGroup, position string) {
 	logger.Println("clock in:", user.Name)
-	_, res := clock(user, position)
-	logger.Println("clock in result:", res)
+	err, res := clock(user, position)
+	if err != nil {
+		logger.Println("clock error: ", err, res)
+	} else {
+		logger.Println("clock in result:", res)
+	}
+
+	if strings.Contains(res, "您已上报过") {
+		logger.Println("already reported")
+		wg.Done()
+		return
+	}
 
 	logger.Println("send email:", user.Email)
-	notice(user.Email, user.Name, res)
+	if err := notice(user.Email, user.Name, res); err != nil {
+		logger.Println("send email error:", err)
+	}
 
 	wg.Done()
 }
@@ -90,8 +103,8 @@ func clock(user User, pisoition string) (err error, res string) {
 	defer response.Body.Close()
 	var clockRes ClockRes
 	err = json.NewDecoder(response.Body).Decode(&clockRes)
-	if err != nil {
-		return err, "请更新 Cookies, 如若无效，请联系管理员！"
+	if err != nil || strings.Contains(clockRes.M, "用户信息已失效") {
+		return err, "用户信息已失效, 请更新 Cookies, 如若无效，请联系管理员！"
 	}
 	return nil, string(clockRes.M)
 }

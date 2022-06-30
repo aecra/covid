@@ -1,8 +1,8 @@
 import Axios from 'axios';
-import { verify } from './oauth';
+import OauthService from './oauth';
 
 const instance = Axios.create({
-  baseURL: 'https://covid-api.aecra.cn/',
+  baseURL: 'https://api3.aecra.cn/covid/',
   timeout: 1000,
   responseType: 'json',
   headers: { 'Content-Type': 'application/json;charset=utf-8' },
@@ -11,7 +11,9 @@ const instance = Axios.create({
 instance.interceptors.request.use(
   function (config) {
     // 在发送请求之前做些什么
-    verify();
+    if (!OauthService.verifyToken()) {
+      throw new Axios.Cancel('Operation canceled by the user.');
+    }
     (config as any).headers['Authorization'] = 'Bearer ' + localStorage.getItem('access_token');
     return config;
   },

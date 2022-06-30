@@ -37,9 +37,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { verify } from '../tools/oauth'
 
-verify()
 const activeNames = ref(['1'])
 
 </script>

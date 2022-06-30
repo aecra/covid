@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { verify } from '../tools/oauth'
-
-verify()
 </script>
 
 <template>
