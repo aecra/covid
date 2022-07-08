@@ -5,10 +5,10 @@ import { buildQueryString } from './utils';
 let config = {
   authorization_endpoint: 'https://oauth.aecra.cn/login/oauth/authorize',
   token_endpoint: 'https://oauth.aecra.cn/api/login/oauth/access_token',
-  refresh_token_endpoint: 'https://oauth.aecra.cn/api//login/oauth/refresh_token',
+  refresh_token_endpoint: 'https://oauth.aecra.cn/api/login/oauth/refresh_token',
   client_id: '4278f4c62cb5764f644e',
   client_secret: 'e7170c761c47483e6f57a0e94c94248f280a573f',
-  redirect_uri: 'https://covid.aecra.cn/#/Oauth',
+  redirect_uri: window.location.protocol + '//' + window.location.host + '/#/Oauth',
   scope: 'openid email profile address phone offline_access',
   state: 'viursdhgnbiseyagb',
   response_type: 'code',
@@ -34,7 +34,7 @@ let verifyToken = async () => {
 };
 
 let getAccessToken = async (code: string) => {
-  console.log("access_token request start");
+  console.log('access_token request start');
   const res = await Axios({
     method: 'post',
     url: config.token_endpoint,
@@ -50,12 +50,12 @@ let getAccessToken = async (code: string) => {
       client_secret: config.client_secret,
     }),
   });
-  console.log("access_token request over");
+  console.log('access_token request over');
   if (res.data.error || res.data.access_token.includes('error')) {
-    console.log("access_token request is worning");
+    console.log('access_token request is worning');
     return Promise.reject('get access token error');
   }
-  console.log("access_token request is ok");
+  console.log('access_token request is ok');
   localStorage.setItem('access_token', res.data.access_token);
   localStorage.setItem('refresh_token', res.data.refresh_token);
   localStorage.setItem('expires', String(Math.floor(Date.now() / 1000) + res.data.expires_in));
@@ -99,16 +99,17 @@ let refrershAccessToken = () => {
 };
 
 let redirectToLogin = () => {
-  window.location.href =
+  window.location.replace(
     config.login_url +
-    '?' +
-    buildQueryString({
-      client_id: config.client_id,
-      response_type: config.response_type,
-      scope: config.scope,
-      state: config.state,
-      redirect_uri: config.redirect_uri,
-    });
+      '?' +
+      buildQueryString({
+        client_id: config.client_id,
+        response_type: config.response_type,
+        scope: config.scope,
+        state: config.state,
+        redirect_uri: config.redirect_uri,
+      })
+  );
 };
 
 let Oauth = (data: any) => {
@@ -131,15 +132,15 @@ let Oauth = (data: any) => {
   }
 };
 
-let navigationGuard =  async (to: RouteLocationNormalized) => {
-  if(to.path !== '/Oauth' && !(await OauthService.verifyToken())){
-    return "/Oauth"
+let navigationGuard = async (to: RouteLocationNormalized) => {
+  if (to.path !== '/Oauth' && !(await OauthService.verifyToken())) {
+    return '/Oauth';
   }
   if (to.path === '/Oauth') {
     OauthService.Oauth(to.query);
     return false;
   }
-}
+};
 
 const OauthService = {
   Oauth,
