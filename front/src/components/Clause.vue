@@ -1,6 +1,3 @@
-<script setup lang="ts">
-</script>
-
 <template>
   <div>
     <h3>免责声明</h3>
@@ -9,6 +6,12 @@
     <div>如若需要删除数据请发送邮件至 support@aecra.cn。</div>
   </div>
 </template>
+
+<script lang="ts">
+export default {
+  name: 'ClauseComponent',
+}
+</script>
 
 <style>
 </style>

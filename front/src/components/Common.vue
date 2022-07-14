@@ -1,10 +1,3 @@
-<script setup lang="ts">
-import Menu from './Menu.vue'
-import MenuInside from './Menu-inside.vue'
-import Header from "./Header.vue"
-
-</script>
-
 <template>
   <div class="common-layout">
     <el-container class="full-height">
@@ -25,6 +18,18 @@ import Header from "./Header.vue"
     </el-container>
   </div>
 </template>
+
+<script setup lang="ts">
+import Menu from './Menu.vue'
+import MenuInside from './MenuInside.vue'
+import Header from "./Header.vue"
+</script>
+
+<script lang="ts">
+export default {
+  name: 'CommonComponent',
+}
+</script>
 
 <style>
 html,

@@ -32,14 +32,13 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
-import { ElLoading } from 'element-plus'
-import { ElMessage } from 'element-plus'
-import request from '../tools/request'
-
+import { reactive } from 'vue';
+import { ElLoading } from 'element-plus';
+import { ElMessage } from 'element-plus';
+import DataService from '../utils/DataService';
 
 // do not use same name with ref
-const form = reactive({
+let form = reactive({
   name: '',
   email: '',
   state: false,
@@ -47,45 +46,42 @@ const form = reactive({
   eaisess: '',
   uukey: '',
   home: '',
-})
+});
 
 const onSubmit = async () => {
-  const data = JSON.stringify({
+  const loadingInstance = ElLoading.service({ target: '.el-main' });
+  const [err] = await DataService.updateUser({
     name: form.name,
     email: form.email,
     position: form.position,
-    state: form.state ? "on" : "off",
+    state: form.state ? 'on' : 'off',
     eaisess: form.eaisess,
     uukey: form.uukey,
     home: form.home,
   });
-
-  const loadingInstance = ElLoading.service({target: '.el-main'})
-  try {
-    await request.post('/UpdateUser', data);
-  } catch {
-    ElMessage.error('更新数据失败.')
+  if (err) {
+    ElMessage.error('更新数据失败.');
+  } else {
+    ElMessage.success('更新数据成功.');
   }
-  loadingInstance.close()
-}
+  loadingInstance.close();
+};
 
 const getUser = async () => {
-  const loadingInstance = ElLoading.service({target: '.el-main'})
-  try {
-    const response = await request.post('/User');
-    const data = response.data;
-    form.name = data.name;
-    form.email = data.email;
-    form.state = (data.state === "on");
-    form.position = data.position;
-    form.eaisess = data.eaisess;
-    form.uukey = data.uukey;
-    form.home = data.home;
-  } catch {
-    ElMessage.error('获取数据失败.')
+  const loadingInstance = ElLoading.service({ target: '.el-main' });
+  const [err, res] = await DataService.getUser();
+  if (err) {
+    ElMessage.error('获取数据失败.');
   }
-  loadingInstance.close()
-}
+  form = Object.assign(form, res);
+  loadingInstance.close();
+};
 
-getUser()
+getUser();
+</script>
+
+<script lang="ts">
+export default {
+  name: 'UserPage',
+};
 </script>
