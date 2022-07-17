@@ -8,7 +8,7 @@ const conf = {
       client_secret: 'e7170c761c47483e6f57a0e94c94248f280a573f',
       scope: 'openid email',
       response_type: 'code',
-      api_base_url: 'https://api3.aecra.cn/covid/',
+      api_base_url: '/api/',
   },
 }
 

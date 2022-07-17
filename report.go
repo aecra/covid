@@ -5,45 +5,49 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"github.com/aecra/covid/object"
 )
+
+type ClockRes struct {
+	M string `json:"m"`
+}
 
 var (
 	buf    bytes.Buffer
 	logger = log.New(&buf, "", log.LstdFlags)
 )
 
-func main() {
+func report() {
+	// sleep a random time between 0 and 30 mins
+	time.Sleep(time.Duration(rand.Intn(30)) * time.Minute)
 	defer fmt.Print(&buf)
-	dsn := "aecra:tjak%mariadb@tcp(s1.aecra.cn:7854)/covid"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
-	if err != nil {
-		panic(err)
-	}
-
-	var users []User
-	db.Where("state = 'on'").Find(&users)
+	users := object.GetActiveUser()
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(users), func(i, j int) {
+		users[i], users[j] = users[j], users[i]
+	})
 
 	wg := sync.WaitGroup{}
 	for _, user := range users {
 		if user.Position == "school" {
 			wg.Add(1)
-			report(user, &wg, "school")
+			reportSignal(user, &wg, "school")
 		} else {
 			wg.Add(1)
-			report(user, &wg, "home")
+			reportSignal(user, &wg, "home")
 		}
 	}
 	wg.Wait()
 }
 
-func report(user User, wg *sync.WaitGroup, position string) {
+func reportSignal(user object.User, wg *sync.WaitGroup, position string) {
 	logger.Println("clock in:", user.Name)
 	err, res := clock(user, position)
 	if err != nil {
@@ -62,19 +66,26 @@ func report(user User, wg *sync.WaitGroup, position string) {
 	if err := notice(user.Email, user.Name, res); err != nil {
 		logger.Println("send email error:", err)
 	}
+	object.AddRecord(&object.Record{
+		Name:     user.Name,
+		Email:    user.Email,
+		Position: position,
+		Content:  res,
+		Result:   res,
+	})
 
 	wg.Done()
 }
 
-func clock(user User, pisoition string) (err error, res string) {
+func clock(user object.User, position string) (err error, res string) {
 	httpPostUrl := "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save"
 	var jsonData = []byte(`{"sfzx":1,"tw":1,"area":"陕西省 西安市 长安区","city":"西安市","province":"陕西省","address":"陕西省西安市长安区兴隆街道丁香路西安电子科技大学南校区","geo_api_info":{"type":"complete","position":{"Q":34.123646375869,"R":108.82832438151098,"lng":108.828324,"lat":34.123646},"location_type":"html5","message":"Get ipLocation failed.Get geolocation success.Convert Success.Get address success.","accuracy":79,"isConverted":"true","status":1,"addressComponent":{"citycode":"029","adcode":"610116","businessAreas":[],"neighborhoodType":"","neighborhood":"","building":"","buildingType":"","street":"雷甘路","streetNumber":"266#","country":"中国","province":"陕西省","city":"西安市","district":"长安区","township":"兴隆街道"},"formattedAddress":"陕西省西安市长安区兴隆街道丁香路西安电子科技大学南校区","roads":[],"crosses":[],"pois":[],"info":"SUCCESS"},"sfcyglq":0,"sfyzz":0,"qtqk":"","ymtys":0}`)
 
 	var SendData []byte
-	if pisoition == "school" {
+	if position == "school" {
 		SendData = jsonData
 	} else {
-		SendData = []byte(user.Position)
+		SendData = []byte(user.Home)
 	}
 	request, err := http.NewRequest("POST", httpPostUrl, bytes.NewBuffer(SendData))
 	if err != nil {

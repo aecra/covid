@@ -1,7 +1,4 @@
-package main
-
-var (
-	PUB_PEM = `-----BEGIN CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
 MIIE2TCCAsGgAwIBAgIDAeJAMA0GCSqGSIb3DQEBCwUAMCYxDjAMBgNVBAoTBWFk
 bWluMRQwEgYDVQQDDAtjZXJ0XzljejNxYTAeFw0yMjAzMjUxMjM0NTVaFw00MjAz
 MjUxMjM0NTVaMCYxDjAMBgNVBAoTBWFkbWluMRQwEgYDVQQDDAtjZXJ0XzljejNx
@@ -28,6 +25,4 @@ kvszynD0pr70lT7mHfR3oxNvIEcbEK2FMZklVHnJvmt3qXZ9+i0wolCzIxg9KDjO
 DwpPcto9iGa4SwcBwoEk8m1oPuhwh0WJfjt+iXf8UhrUgYMhE1ga9ETa0o1CJgy0
 B5usLHnHVB+dRrDf5cDBxZTCGGE2Ex5ltYWiLXsmL6744QB6Hj10vU7tNS3asrER
 0P0mHNcD+4zGnd1tQ8IapmudbjjVKfhjGA+Gs1UqlbcDoG1qgwemCU6pHzRM
------END CERTIFICATE-----`
-	DB_DNS = "aecra:tjak%mariadb@tcp(s1.aecra.cn:7854)/covid"
-)
+-----END CERTIFICATE-----

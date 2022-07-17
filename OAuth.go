@@ -1,9 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strings"
 
+	"github.com/aecra/covid/object"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
@@ -17,18 +21,10 @@ var (
 	Insuficient_Scope   = "insuficient_scope"
 )
 
-type AuthError struct {
-	msg string
-}
-
-func (e *AuthError) Error() string {
-	return e.msg
-}
-
-func Oauth(identity string) gin.HandlerFunc {
+func OAuth(identity string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if claims, err := auth(c, identity); err == nil {
-			c.Set("claims", claims)
+		if user, err := auth(c, identity); err == nil && user != nil {
+			c.Set("user", user)
 			c.Next()
 		} else {
 			switch err.Error() {
@@ -47,24 +43,31 @@ func Oauth(identity string) gin.HandlerFunc {
 	}
 }
 
-func auth(c *gin.Context, identity string) (jwt.MapClaims, error) {
+func auth(c *gin.Context, identity string) (*object.User, error) {
 	authorization := c.Request.Header.Get("Authorization")
 
 	if authorization == "" {
-		return nil, &AuthError{msg: Auth_Unauthorized}
+		return nil, errors.New(Auth_Unauthorized)
 	}
 
 	res := strings.Split(authorization, " ")
 
 	if len(res) != 2 || res[0] != "Bearer" {
-		return nil, &AuthError{msg: Auth_Unauthorized}
+		return nil, errors.New(Auth_Unauthorized)
 	}
 
-	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(PUB_PEM))
+	// read public key from ./cert/key.pub
+	file, err := os.Open("./cert/key.pub")
 	if err != nil {
-		return nil, &AuthError{msg: Server_Error}
+		return nil, errors.New(Server_Error)
 	}
+	defer file.Close()
 
+	content, err := ioutil.ReadAll(file)
+	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(content))
+	if err != nil {
+		return nil, errors.New(Server_Error)
+	}
 	token, err := jwt.Parse(res[1], func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -74,16 +77,24 @@ func auth(c *gin.Context, identity string) (jwt.MapClaims, error) {
 
 	if err != nil {
 		fmt.Println(err)
-		return nil, &AuthError{msg: Auth_InvalidToken}
+		return nil, errors.New(Auth_InvalidToken)
 	}
 
 	if _, ok := token.Claims.(jwt.MapClaims); !ok || !token.Valid {
-		return nil, &AuthError{msg: Auth_InvalidToken}
+		return nil, errors.New(Auth_InvalidToken)
 	}
 
 	if identity == Auth_Identify_Admin && token.Claims.(jwt.MapClaims)["isAdmin"] == false {
-		return nil, &AuthError{msg: Insuficient_Scope}
+		return nil, errors.New(Insuficient_Scope)
 	}
 
-	return token.Claims.(jwt.MapClaims), nil
+	user := object.GetUserByName(token.Claims.(jwt.MapClaims)["name"].(string))
+	if user.Name == "" {
+		user.Name = token.Claims.(jwt.MapClaims)["name"].(string)
+		user.Email = token.Claims.(jwt.MapClaims)["email"].(string)
+		user.State = false
+		object.AddUser(&user)
+	}
+
+	return &user, nil
 }

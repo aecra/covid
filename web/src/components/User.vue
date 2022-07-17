@@ -50,15 +50,7 @@ let form = reactive({
 
 const onSubmit = async () => {
   const loadingInstance = ElLoading.service({ target: '.el-main' });
-  const [err] = await DataService.updateUser({
-    name: form.name,
-    email: form.email,
-    position: form.position,
-    state: form.state ? 'on' : 'off',
-    eaisess: form.eaisess,
-    uukey: form.uukey,
-    home: form.home,
-  });
+  const [err] = await DataService.updateUser(form);
   if (err) {
     ElMessage.error('更新数据失败.');
   } else {
