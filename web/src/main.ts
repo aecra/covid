@@ -1,38 +1,53 @@
 // main.ts
-import { createApp } from 'vue';
+import {createApp} from 'vue';
 import ElementPlus from 'element-plus';
 import './css/normalize.css';
 import 'element-plus/dist/index.css';
 import 'element-plus/theme-chalk/display.css';
 import App from './App.vue';
-import conf from './conf';
-import OAuthService from './utils/OAuthService';
 
 // import components
+import LoginPage from './components/Login.vue';
+import RegisterPage from './components/Register.vue';
 import Home from './components/Home.vue';
 import User from './components/User.vue';
+import Records from './components/Records.vue'
 import Help from './components/Help.vue';
 import Clause from './components/Clause.vue';
 
-import { createRouter, createWebHashHistory } from 'vue-router';
-
-console.log("before Init OAuthService");
-OAuthService.Init(conf.OAuth);
-console.log("after Init OAuthService");
+import {createRouter, createWebHashHistory} from 'vue-router';
+import auth from "./utils/auth";
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/User', component: User },
-  { path: '/Help', component: Help },
-  { path: '/Clause', component: Clause },
+  {
+    path: '/login',
+    name: 'loginPage',
+    component: LoginPage,
+    meta: {
+      keepalive: false
+    }
+  },
+  {
+    path: '/register',
+    name: 'registerPage',
+    component: RegisterPage,
+    meta: {
+      keepalive: false
+    }
+  },
+  {path: '/', component: Home, meta: {keepalive: true}},
+  {path: '/User', component: User, meta: {keepalive: true}},
+  {path: '/Records', component: Records, meta: {keepalive: true}},
+  {path: '/Help', component: Help, meta: {keepalive: true}},
+  {path: '/Clause', component: Clause, meta: {keepalive: true}},
 ];
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: [...routes, ...OAuthService.Routes],
+  routes: routes,
 });
 
-router.beforeEach(OAuthService.NavigationGuard);
+router.beforeEach(auth.guard);
 
 const app = createApp(App);
 app.use(router);

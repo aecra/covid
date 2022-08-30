@@ -6,6 +6,9 @@
     <router-link to="/User">
       <el-button class="plain" plain>用户设置</el-button>
     </router-link>
+    <router-link to="/Records">
+      <el-button class="plain" plain>填报记录</el-button>
+    </router-link>
     <router-link to="/Help">
       <el-button class="plain" plain>帮助说明</el-button>
     </router-link>

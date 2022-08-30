@@ -35,4 +35,4 @@ web/*.sw?
 *.sw?
 
 # go build
-main
+backend/main

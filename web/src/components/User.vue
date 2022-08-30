@@ -1,7 +1,7 @@
 <template>
   <el-form :model="form" label-width="120px">
     <el-form-item label="姓名">
-      <el-input disabled v-model="form.name" />
+      <el-input disabled v-model="form.username" />
     </el-form-item>
     <el-form-item label="邮箱">
       <el-input v-model="form.email" />
@@ -26,6 +26,7 @@
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="onSubmit">保存修改</el-button>
+      <el-button type="primary" @click="report">立即上报</el-button>
       <el-button @click="getUser">刷新</el-button>
     </el-form-item>
   </el-form>
@@ -39,7 +40,7 @@ import DataService from '../utils/DataService';
 
 // do not use same name with ref
 let form = reactive({
-  name: '',
+  username: '',
   email: '',
   state: false,
   position: '',
@@ -58,6 +59,17 @@ const onSubmit = async () => {
   }
   loadingInstance.close();
 };
+
+const report = async () => {
+  const loadingInstance = ElLoading.service({ target: '.el-main' });
+  const [err] = await DataService.report();
+  if (err) {
+    ElMessage.error('上报失败.');
+  } else {
+    ElMessage.success('上报成功.');
+  }
+  loadingInstance.close();
+}
 
 const getUser = async () => {
   const loadingInstance = ElLoading.service({ target: '.el-main' });

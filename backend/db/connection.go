@@ -1,4 +1,4 @@
-package object
+package db
 
 import (
 	"os"
@@ -11,7 +11,10 @@ var (
 	database *gorm.DB
 )
 
-func Init() {
+func GetConnection() *gorm.DB {
+	if database != nil {
+		return database
+	}
 	var db_dsn string
 	if os.Getenv("DB_DSN") != "" {
 		db_dsn = os.Getenv("DB_DSN")
@@ -23,7 +26,5 @@ func Init() {
 		panic(err)
 	}
 	database = db
-
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Record{})
+	return database
 }

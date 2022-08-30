@@ -1,6 +1,7 @@
 package route
 
 import (
+	"github.com/aecra/covid/common"
 	"github.com/aecra/covid/object"
 	"github.com/gin-gonic/gin"
 )
@@ -29,13 +30,13 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if inUser.Name != user.Name {
+	if inUser.Username != user.Username {
 		c.AbortWithStatus(401)
 		return
 	} else if !(inUser.Position == "school" || inUser.Position == "home") {
 		c.AbortWithStatus(401)
 		return
-	} else if VerifyEmailFormat(inUser.Email) == false {
+	} else if !common.VerifyEmail(inUser.Email) {
 		c.AbortWithStatus(401)
 		return
 	}

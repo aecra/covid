@@ -10,13 +10,18 @@
         <span class="title">用户设置</span>
       </el-menu-item>
     </router-link>
-    <router-link to="/Help">
+    <router-link to="/Records">
       <el-menu-item index="3">
+        <span class="title">填报记录</span>
+      </el-menu-item>
+    </router-link>
+    <router-link to="/Help">
+      <el-menu-item index="4">
         <span class="title">帮助说明</span>
       </el-menu-item>
     </router-link>
     <router-link to="/Clause">
-      <el-menu-item index="4">
+      <el-menu-item index="5">
         <span class="title">使用条款</span>
       </el-menu-item>
     </router-link>
