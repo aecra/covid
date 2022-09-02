@@ -7,8 +7,12 @@ import (
 
 func Start() {
 	c := cron.New()
-	// 考虑是否将两者分开
-	c.AddFunc("57 10 8,12 * * *", report.ReportAllClock)
-	c.AddFunc("39 27 7 * * *", report.ReportAllHealth)
+	if _, err := c.AddFunc("13 8,12 * * *", report.ReportAllClock); err != nil {
+		panic(err)
+	}
+	if _, err := c.AddFunc("39 7 * * *", report.ReportAllHealth); err != nil {
+		panic(err)
+	}
 	c.Start()
+	select {}
 }

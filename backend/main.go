@@ -13,7 +13,7 @@ import (
 
 func main() {
 	migration.AutoMigrate()
-	corn.Start()
+	go corn.Start()
 	r := gin.Default()
 
 	r.StaticFile("/", "./web/dist/index.html")
