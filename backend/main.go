@@ -14,6 +14,7 @@ import (
 func main() {
 	migration.AutoMigrate()
 	go corn.Start()
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	r.StaticFile("/", "./web/dist/index.html")
