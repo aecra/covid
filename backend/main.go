@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/aecra/covid/auth"
 	auth_middleware "github.com/aecra/covid/auth/middleware"
@@ -10,6 +12,21 @@ import (
 	"github.com/aecra/covid/route"
 	"github.com/gin-gonic/gin"
 )
+
+var (
+	SERVER_PORT = os.Getenv("SERVER_PORT")
+)
+
+func init() {
+	if SERVER_PORT == "" {
+		SERVER_PORT = "8080"
+	}
+	// Verify that the port is legal, 0-65535
+	port, err := strconv.Atoi(SERVER_PORT)
+	if err != nil || port < 0 || port > 65535 {
+		panic("SERVER_PORT is not set or not supported")
+	}
+}
 
 func main() {
 	migration.AutoMigrate()
@@ -39,7 +56,7 @@ func main() {
 		auth.RegisterAuthRoutes(authRoute)
 	}
 
-	err := r.Run(":8080")
+	err := r.Run(fmt.Sprintf(":%s", SERVER_PORT))
 	if err != nil {
 		fmt.Println("Start server failed.")
 	}
