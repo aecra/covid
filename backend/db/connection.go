@@ -16,11 +16,11 @@ var (
 )
 
 func init() {
-	var db_type = os.Getenv("DB_TYPE")
+	var db_type = os.Getenv("COVID_DB_TYPE")
 	if db_type == "" {
 		db_type = "sqlite"
 	}
-	var db_dsn = os.Getenv("DB_DSN")
+	var db_dsn = os.Getenv("COVID_DB_DSN")
 	if db_dsn == "" {
 		db_dsn = "covid.db"
 	}

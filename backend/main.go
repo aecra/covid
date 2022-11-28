@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	SERVER_PORT = os.Getenv("SERVER_PORT")
+	SERVER_PORT = os.Getenv("COVID_SERVER_PORT")
 )
 
 func init() {

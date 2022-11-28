@@ -14,7 +14,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-var jwtSecret = os.Getenv("JWT_SECRET")
+var jwtSecret = os.Getenv("COVID_JWT_SECRET")
 
 func GenerateJwtToken(user *object.User) (string, error) {
 

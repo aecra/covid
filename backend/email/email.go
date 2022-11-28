@@ -13,10 +13,10 @@ func EmailNotice(emailAddr, greet, res string) (err error) {
 	}
 	sendCinfig := SendConfig{
 		Username:  "COVID",
-		EmailAddr: os.Getenv("EMAIL_ADDR"),
-		Password:  os.Getenv("EMAIL_PASSWORD"),
-		Host:      os.Getenv("EMAIL_HOST"),
-		Port:      s2i(os.Getenv("EMAIL_PORT")),
+		EmailAddr: os.Getenv("COVID_EMAIL_ADDR"),
+		Password:  os.Getenv("COVID_EMAIL_PASSWORD"),
+		Host:      os.Getenv("COVID_EMAIL_HOST"),
+		Port:      s2i(os.Getenv("COVID_EMAIL_PORT")),
 	}
 	return sendEmail(&message, &sendCinfig)
 }
