@@ -24,15 +24,21 @@ Docker 部署
 
     ```bash
     docker run -itd --name covid \
+      -e DB_TYPE="mysql" \
       -e DB_DSN="root:password@tcp(host:3306)/covid?parseTime=true" \
       -e EMAIL_ADDR="your email aaddress" \
       -e EMAIL_HOST="smtp server host" \
       -e EMAIL_PASSWORD="" \
       -e EMAIL_PORT="587" \
       -e JWT_SECRET="add your secret" \
+      -e SERVER_PORT="8080" \
       -p 9365:8080 \
       aecra/covid:latest
     ```
+
+该系统支持 MySQL、PostgreSQL、sqlite3、sqlserver 数据库，使用环境变量 DB_TYPE 指定数据库类型，使用 DB_DSN 指定数据库连接信息，详细设置方法见 gorm 文档，系统默认使用 sqlite3 作为本地数据库。
+
+邮件通知使用环境变量 EMAIL_ADDR、EMAIL_HOST、EMAIL_PASSWORD、EMAIL_PORT 指定邮件服务器信息，使用环境变量 JWT_SECRET 指定 jwt 密钥，使用环境变量 SERVER_PORT 指定服务端口，默认端口为 8080。
 
 ## 二次开发
 
