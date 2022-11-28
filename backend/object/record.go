@@ -16,6 +16,10 @@ type Record struct {
 	NoticeResult string    `gorm:"default:''" json:"notice_result"`
 }
 
+func init() {
+	db.GetConnection().AutoMigrate(&Record{})
+}
+
 func AddRecord(record *Record) {
 	db.GetConnection().Create(record)
 }

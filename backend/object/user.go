@@ -19,6 +19,10 @@ type User struct {
 	Home     string `json:"home"`
 }
 
+func init() {
+	db.GetConnection().AutoMigrate(&User{})
+}
+
 func GetActiveClockUser() []User {
 	var users []User
 	db.GetConnection().Where(&User{State: true, Position: "school"}).Find(&users)

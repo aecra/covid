@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
 	"github.com/aecra/covid/auth"
 	auth_middleware "github.com/aecra/covid/auth/middleware"
 	"github.com/aecra/covid/corn"
-	"github.com/aecra/covid/migration"
 	"github.com/aecra/covid/route"
 	"github.com/gin-gonic/gin"
 )
@@ -24,12 +24,11 @@ func init() {
 	// Verify that the port is legal, 0-65535
 	port, err := strconv.Atoi(SERVER_PORT)
 	if err != nil || port < 0 || port > 65535 {
-		panic("SERVER_PORT is not set or not supported")
+		log.Fatal("SERVER_PORT is not set or not supported")
 	}
 }
 
 func main() {
-	migration.AutoMigrate()
 	go corn.Start()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
